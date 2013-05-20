@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Gles2framework : a simple framework for OpenGLES 2.0 " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Gles2framework</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/if1live/gles2framework">View on GitHub</a>
+
+          <h1 id="project_title">Gles2framework</h1>
+          <h2 id="project_tagline">a simple framework for OpenGLES 2.0 </h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/if1live/gles2framework/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/if1live/gles2framework/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>gles2framework</h1>
+
+<h3>a simple framework for OpenGLES 2.0 written in C</h3>
+
+<p>*** Brief API notes at the end of the readme ***</p>
+
+<p>intended to help learning and tutorial writing</p>
+
+<p>Currently supports XORG (linux) and the raspberry pi (none Xwindows proprietory EGL) on the pi it 
+can be run with or without X</p>
+
+<p>dependencies libpng, libEGL, libGLES (2.0), libode (0.12) for phystest, Chipmunk-6.1.1 for chiptest</p>
+
+<p>pkg-config, build-esentials and development libraries must be installed to compile the framework</p>
+
+<h3>Raspberry pi specifics</h3>
+
+<p>if you have not compiled GLES source code on your pi before you may need to make a file called</p>
+
+<p>/etc/ld.so.conf.d/vc.conf</p>
+
+<p>it should contain just the line</p>
+
+<p>/opt/vc/lib</p>
+
+<h5>raw mouse, keyboard and joystick on Raspberry pi</h5>
+
+<p>When not using xwindows (ie via ssh) input including keyboard is now done entirely via
+the kernel evdev interface.</p>
+
+<p>you need some udev rules (this does open the way for keyloggers for the paranoid!)</p>
+
+<p>make a file called /etc/udev/rules.d/99-evdev.rules (as root) it should contain the following</p>
+
+<pre><code>KERNEL=="event*", NAME="input/%k", MODE="0640", GROUP="evdev"
+KERNEL=="mouse*", NAME="input/%k", MODE="0640", GROUP="evdev"
+KERNEL=="js*", NAME="input/%k", MODE="0640", GROUP="evdev"
+</code></pre>
+
+<p>you need to add an new group and add your user account to the group (as root)</p>
+
+<pre><code>groupadd evdev
+usermod -a -G evdev your_user_name
+</code></pre>
+
+<p>you'll need to reboot</p>
+
+<p>You can now run your programs from ssh and it will only use the Pi's attached
+usb keyboard rather than being confused with the ssh console</p>
+
+<p>editing files via ssh (sftp enabled editor) and compiling with a ssh console is the recommended
+way of developing with this framework</p>
+
+<h3>file structure for external libraries</h3>
+
+<p>some examples rely on external libraries they should be extracted and compiled in the same 
+directory that you are working on the frame work like this:</p>
+
+<pre><code>Chipmunk-6.1.1        ode-0.12            gles2framework 
+</code></pre>
+
+<h3>phystest (ode example)</h3>
+
+<p>the rather hacky ODE example is only really for advanced users... compile ode from source 
+(version v0.12) release you can then </p>
+
+<p>You need it to use dSingle with trimesh support and you might want other things like custom cylinder
+vs cylinder colliders etc you won't get from the repo version </p>
+
+<p>set drawstuff=none for quicker build (no demos etc)</p>
+
+<p>run ./configure --help in the ode directory.</p>
+
+<h3>chiptest (Chipmonk physics example)</h3>
+
+<p>a quick example showing some balls falling on some invisible slopes, niether the sprites or the 
+position of the slopes are scaled depending on the display size, so the sample will look 
+different on for example xorg or the pi (or even on the pi if using hdmi v's composite)
+and is a good example of why you should use scaled sizes!</p>
+
+<p>You can pass parameters to cmake or edit CMakeLists.txt so as to NOT compile the demos, 
+you only need compile a static library</p>
+
+<pre><code>option(BUILD_DEMOS "Build the demo applications" OFF)
+option(INSTALL_DEMOS "Install the demo applications" OFF)
+option(BUILD_SHARED "Build and install the shared library" OFF)
+option(BUILD_STATIC "Build as static library" ON)
+option(INSTALL_STATIC "Install the static library" OFF)
+</code></pre>
+
+<h2>Project structure</h2>
+
+<table>
+<tr>
+<th></th>
+<th>description</th>
+</tr>
+<tr>
+<td>-include</td>
+<td>source code include files</td>
+</tr>
+<tr>
+<td>-kazmath</td>
+<td>source code and docs for the kazmath library</td>
+</tr>
+<tr>
+<td>-lib</td>
+<td>kazmath compiled as static lib goes here. Other libs may follow.  The framework may become a library</td>
+</tr>
+<tr>
+<td>-o</td>
+<td>somewhere to put intermediate binary objects</td>
+</tr>
+<tr>
+<td>-src</td>
+<td>source code for the framework</td>
+</tr>
+<tr>
+<td>-obj2opengl</td>
+<td>script used to turn wavefront OBJ models into source code also contains script to build GBO objects</td>
+</tr>
+<tr>
+<td>-resources</td>
+<td>holds textures, shaders and binary 3d models for the samples</td>
+</tr>
+<tr>
+<td>-examples</td>
+<td>example code showing use of the framework</td>
+</tr>
+<tr>
+<td>Makefile</td>
+<td>tells the compiler how to build the examples</td>
+</tr>
+<tr>
+<td>README.md</td>
+<td>this file!</td>
+</tr>
+<tr>
+<td>TODO.md</td>
+<td>aide memoire, ideas and inspiration for future development</td>
+</tr>
+</table><h4>kazmath</h4>
+
+<p>there is no need to seperatly compile the kazmath library for your platform kazmath sources are now 
+automatically compiled into a static library</p>
+
+<p>All though the source is unchanged I have deleted everthing except the C source and the html 
+documentation the full distribution of kazmath is available at <a href="https://github.com/Kazade/kazmath">https://github.com/Kazade/kazmath</a></p>
+
+<h4>obj2opengl</h4>
+
+<p>In order to create code from OBJ files use this script, ensure you set the output file name to 
+something like shape.c</p>
+
+<p>you will have to manually make shape.h it should look something like this</p>
+
+<pre><code>extern float shapeVerts[];
+extern float shapeTexCoords[];
+extern float shapeNormals[];
+extern unsigned int shapeNumVerts;
+</code></pre>
+
+<p>in addition you will have to add a rule in the Makefile</p>
+
+<p>this method is depricated you should use a GBO instead...</p>
+
+<h3>makeGBO script</h3>
+
+<p>This is a binary file format, a kind of compiled OBJ file which can be used instead of embedding 
+your objects in the executable (which can be wasteful in terms of ram) Once the object data is 
+passed to the GPU the loaded data its based on is freed from memory...</p>
+
+<p>To make a gbo (Gles Binary Object) file place your wavefront object into the same directory, if 
+for example the shape is called alien.obj then execute ./makeGBO.sh alien - note the lack of the 
+file extension it will output alien.gbo which you can then copy to your resources directory - 
+see loadObj command detailed below.  makeGBO.sh relies on obj2opengl which must be in the same 
+directory, it also needs at least the build esentials if going on another (artists) machine.</p>
+
+<h2>support routines</h2>
+
+<hr><p><strong>int loadPNG(const char *filename);</strong></p>
+
+<p>loads a specified png file returning a GLES texture handle</p>
+
+<hr><p><strong>int makeContext();</strong></p>
+
+<p>creates a native window and sets up a GLES context within it</p>
+
+<hr><p><strong>void closeContext();</strong></p>
+
+<p>closes GLES context and window</p>
+
+<hr><p><strong>GLuint create_shader(const char *filename, GLenum type);</strong></p>
+
+<p>returns a GLES shader handle from a file you must specify what type of shader it is either 
+GL_VERTEX_SHADER or GL_FRAGMENT_SHADER</p>
+
+<hr><p><strong>GLuint getShaderLocation(int type, GLuint prog, const char *name);</strong></p>
+
+<p>given a type of shaderAttrib or shaderUniform, a shader program handle and a name for the attrib 
+or uniform it returns a location handle</p>
+
+<hr><p><strong>void initGlPrint(int w, int h);</strong></p>
+
+<p>This initialises the resources used by the glPrintf you must supply the windows width and height</p>
+
+<hr><p><strong>font_t* createFont(const char* tpath,uint cbase,float tHeight,float tLines, int fWidth, int fHeight);</strong></p>
+
+<p>tpath is the full path and of the texture for this font, cbase is the ascii code of the first character 
+tHeight is the height in pixels of the texture, tLines specifies the number of lines in total the texture 
+contains (I think there is a bug with this!) fWidth and fHeight are the width and height a character</p>
+
+<p>TODO freeFont to release a fonts resources...</p>
+
+<hr><p><strong>void glPrintf(float x, float y, font_t fnt, const char *fmt, ...);</strong></p>
+
+<p>this behaves exactly like a normal printf except for the first two parameters which specify the starting coordinate 
+you must specify a previously created font structure to print with</p>
+
+<hr><p><strong>void swapBuffers();</strong></p>
+
+<p>In order isolate egl and native window handles use this routine instead of eglSwapBuffers</p>
+
+<hr><p><strong>void doEvents();</strong></p>
+
+<p>this should be called once a frame to update the key down boolean array and the mouse information</p>
+
+<hr><p><strong>int* getMouse();</strong></p>
+
+<p>this returns a pointer to an array of 3 ints the first 2 are the x and y mouse position the 3rd int 
+is a bit field reflecting the state of the mouse buttons</p>
+
+<hr><p><strong>bool* getKeys();</strong></p>
+
+<p>this is an array of 256 bools, while a key is held down the coresponding bool is true, key values are defined in keys.h</p>
+
+<hr><p>*** deprecated may be removed in later version ***</p>
+
+<p><strong>int createObj(struct obj_t *obj, int numVerts, float verts[], float txVert[], float norms[], char *vertShader, char *fragShader);</strong></p>
+
+<p>pass an empty obj_t struct, the number of vertices and arrays of verts, texture coordinates and 
+normals, finally you need to specify the file names for the vert and frag shaders</p>
+
+<hr><p>*** deprecated may be removed in later version ***</p>
+
+<p><strong>int createObjCopyShader(struct obj_t *obj, int numVerts, float verts[], float txVert[], float norms[], struct obj_t *sdrobj);</strong></p>
+
+<p>this allows you to initialise a obj shape but using an existing obj's shader.</p>
+
+<hr><p><strong>void drawObj(struct obj_t *obj, kmMat4 * combined, kmMat4 * mv, kmVec3 lightDir, kmVec3 viewDir);</strong></p>
+
+<p>this draws an obj, you need to supply a combined model, view and projection matrices as well as a 
+combined model, view matrix for the lighting, light and view direction vectors are also needed for 
+lighting</p>
+
+<hr><p><strong>int getDisplayWidth();</strong> </p>
+
+<p><strong>int getDisplayHeight();</strong></p>
+
+<p>returns full screen width and height, for now when not on Raspberry PI the "screen" is fixed to a 
+640x480 window</p>
+
+<hr><p><strong>int loadObj(struct obj_t *obj,const char *objFile, char *vert, char *frag);</strong></p>
+
+<p><strong>int loadObjCopyShader(struct obj_t *obj,const char *objFile, struct obj_t *sdrobj);</strong></p>
+
+<p>these are basically the same as their createObj counterparts except the OBJ is loaded from a 
+compiled binary wavefront object instead of from embedded data.</p>
+
+<hr><p><strong>void initSprite(int w, int h);</strong></p>
+
+<p><strong>void drawSprite(float x, float y, float w, float h, float a, int tex);</strong></p>
+
+<p>like glPrinf the sprite subsystem must be initialised before use, pass the dimensions of the screen.</p>
+
+<p>when drawing a sprite you specify where you want it (x &amp; y) the size of the sprite (w &amp; h) the rotation (a) and which texture to use (tex)</p>
+
+<hr><p><strong>void setMouseRelative(bool mode);</strong></p>
+
+<p>if mode is true the mouse will report relative position changes only, this is handy for mouse 
+look where you dont want the mouse constrained by the window. By default absolute mouse position 
+is reported</p>
+
+<hr><p><strong>struct joystick_t *getJoystick(int j);</strong></p>
+
+<p><strong>void updateJoystick(struct joystick_t *js);</strong></p>
+
+<p><strong>void releaseJoystick(struct joystick_t *js);</strong></p>
+
+<p>to get a pointer to a joystick call getJoystick with the index of the joystick 0-7
+call this once only</p>
+
+<p>once a frame call updateJoystick you will then have (in the joystick structure)</p>
+
+<pre><code>js-&gt;axis[0..7]      upto 8 axes per joystick (signed short)
+js-&gt;buttons         long - each bit represents a button
+</code></pre>
+
+<p>when finished with a joystick you should call releaseJoystick to close its file
+handle and free the structures memory.</p>
+
+<hr><p><strong>void initPointClouds(const char* vertS, const char* fragS, float pntSize);</strong></p>
+
+<p><strong>struct pointCloud_t* createPointCloud(int size);</strong></p>
+
+<p><strong>void drawPointCloud(struct pointCloud_t* pntC,kmMat4* m);</strong></p>
+
+<p><strong>void freePointCloud(struct pointCloud_t* pntC);</strong></p>
+
+<p>initPointClouds is used initialise the common shader used by the point clouds and set the size
+of the individual points (this can be changed on the fly later by changing a shader uniform)</p>
+
+<p>createPointCloud reserves space for the position and velocity components of each individual 
+point in a cloud</p>
+
+<p>when drawing a point cloud you must pass the combined model/view/projection matrix in
+a similar manner to drawing obj shapes, note you must update the individual point positions
+optionally using the supplied velocity value for each point</p>
+
+<p>While it is ok to keep a point cloud around without drawing it for later use.
+When the resources used by the cloud need to be released call freePoint cloud
+this frees the point cloud structure itself and the associated points data</p>
+
+<hr>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Gles2framework maintained by <a href="https://github.com/if1live">if1live</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-37857096-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
