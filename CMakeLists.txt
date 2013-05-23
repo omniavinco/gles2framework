@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.6)
 project( gles2framework )
 
-include( CheckLibraryExists )
+SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib )
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin )
 
 if(MINGW OR UNIX)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-attributes -std=gnu99")
