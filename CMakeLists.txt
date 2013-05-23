@@ -69,12 +69,19 @@ add_library( gles2framework STATIC
 	
 file( GLOB EXAMPLE_SIMPLE examples/simple.c )
 file( GLOB EXAMPLE_SPRITES examples/sprites.c )
+file( GLOB EXAMPLE_INVADERS examples/invaders.c )
+#file( GLOB EXAMPLE_PHYSTEST examples/phystest.c )
+#file( GLOB EXAMPLE_CHIPTEST examples/chiptest.c )
 
 file(GLOB C_FILES 
 	${GLES2FRAMEWORK_SOURCES}
 	${KAZMATH_SOURCES}
 	${EXAMPLE_SIMPLE}
-	${EXAMPLE_SPRITES})
+	${EXAMPLE_SPRITES}
+	${EXAMPLE_INVADERS}
+	#${EXAMPLE_PHYSTEST}
+#	${EXAMPLE_CHIPTEST}
+	)
 
 if( BUILD_GLFW )	
   set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
@@ -85,6 +92,9 @@ if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 
   add_executable( simple ${EXAMPLE_SIMPLE} )
   add_executable( sprites ${EXAMPLE_SPRITES} )
+  add_executable( invaders ${EXAMPLE_INVADERS} )
+  #add_executable( phystest ${EXAMPLE_PHYSTEST} )
+  #add_executable( chiptest ${EXAMPLE_CHIPTEST} )
 
   if(BUILD_RPI OR BUILD_RPI_NO_X)
     LIST( APPEND SAMPLE_LINK_LIBRARIES gles2framework GLESv2 EGL bcm_host m)
@@ -102,5 +112,8 @@ if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
 
   target_link_libraries( simple ${SAMPLE_LINK_LIBRARIES} )
   target_link_libraries( sprites ${SAMPLE_LINK_LIBRARIES} )
+  target_link_libraries( invaders ${SAMPLE_LINK_LIBRARIES} )
+  #target_link_libraries( phystest ${SAMPLE_LINK_LIBRARIES} )
+  #target_link_libraries( chiptest ${SAMPLE_LINK_LIBRARIES} )
 
 endif()
