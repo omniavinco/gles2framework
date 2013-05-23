@@ -66,6 +66,13 @@ add_library( gles2framework STATIC
 	${GLES2FRAMEWORK_SOURCES} 
 	${KAZMATH_HEADERS}
 	${KAZMATH_SOURCES} )
+
+add_library( gles2framework_shared SHARED
+	${GLES2FRAMEWORK_HEADERS}
+	${GLES2FRAMEWORK_SOURCES}
+	${KAZMATH_HEADERS}
+	${KAZMATH_SOURCES} )
+set_property( TARGET gles2framework_shared PROPERTY LIBRARY_OUTPUT_NAME gles2framework )
 	
 file( GLOB EXAMPLE_SIMPLE examples/simple.c )
 file( GLOB EXAMPLE_SPRITES examples/sprites.c )
