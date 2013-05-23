@@ -4,11 +4,12 @@ project( gles2framework )
 include( CheckLibraryExists )
 
 if(MINGW OR UNIX)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-attributes")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-attributes -std=gnu99")
   set_property(GLOBAL PROPERTY COMPILE_FLAGS "/ZI")
 endif()
 
 if(BUILD_RPI OR BUILD_RPI_NO_X OR BUILD_GLFW)
+else()
   if(CMAKE_SYSTEM_NAME)
     if(CMAKE_SYSTEM_NAME STREQUAL "rpi")
       set(BUILD_RPI ON)
@@ -26,8 +27,11 @@ include_directories( include )
 include_directories( kazmath/kazmath )
 
 if(BUILD_RPI OR BUILD_RPI_NO_X)
-  include_directories("/opt/vc/include" "/opt/vc/include/interface/vcos/pthreads")
-  link_directories("/opt/vc/lib")
+	if(NOT RPI_FIRMWARE_ROOT)
+    SET(RPI_FIRMWARE_ROOT "")
+  endif()
+  include_directories("${RPI_FIRMWARE_ROOT}/opt/vc/include" "${RPI_FIRMWARE_ROOT}/opt/vc/include/interface/vcos/pthreads" "${RPI_FIRMWARE_ROOT}/opt/vc/include/interface/vmcs_host" "${RPI_FIRMWARE_ROOT}/opt/vc/include/interface/vmcs_host/linux")
+  link_directories("${RPI_FIRMWARE_ROOT}/opt/vc/lib")
 endif()
 
 if(BUILD_RPI)
@@ -69,8 +73,10 @@ file(GLOB C_FILES
 	${KAZMATH_SOURCES}
 	${EXAMPLE_SIMPLE}
 	${EXAMPLE_SPRITES})
-	
-set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+
+if( BUILD_GLFW )	
+  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX)
+endif()
 
 # Executables for only Standalone project
 if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
@@ -79,7 +85,10 @@ if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_SOURCE_DIR})
   add_executable( sprites ${EXAMPLE_SPRITES} )
 
   if(BUILD_RPI OR BUILD_RPI_NO_X)
-    LIST( APPEND SAMPLE_LINK_LIBRARIES gles2framework X11 GLESv2 EGL bcm_host)
+    LIST( APPEND SAMPLE_LINK_LIBRARIES gles2framework GLESv2 EGL bcm_host m)
+		if(BUILD_RPI)
+			LIST( APPEND SAMPLE_LINK_LIBRARIES X11 )
+		endif()
   elseif(BUILD_GLFW)
     LIST( APPEND SAMPLE_LINK_LIBRARIES gles2framework GLFW )
     if( WIN32 )
